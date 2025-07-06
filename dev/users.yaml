@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-service
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+spec:
+  selector:
+    app: users
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+        - name: users-api
+          image: hannkertransform/kubernete-demo-user:latest
+          env:
+            - name: MONGODB_CONNECTION_URI
+              value: "mongodb+srv://test:kdjIj8-jduIje-7dOj3t@kuberneteclusterdb.ebb6pgw.mongodb.net/users"
+            - name: AUTH_API_ADDRESSS
+              value: "auth-service.default:3000"
